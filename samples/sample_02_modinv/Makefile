@@ -42,6 +42,6 @@ turing:
 	nvcc $(INC) $(LIB) -I../../include -arch=sm_75 modinv_odd_faster.cu -o mo_faster -lgmp
 
 ampere: 
-	nvcc $(INC) $(LIB) -I../../include -arch=sm_80 modinv_odd.cu -o mo -lgmp
-	nvcc $(INC) $(LIB) -I../../include -arch=sm_80 modinv_odd_faster.cu -o mo_faster -lgmp
+	nvcc $(INC) $(LIB) -I../../include -I/usr/local/cuda-12.6/include -ccbin g++ -std=c++11 -arch=sm_80 modinv_odd.cu -o mo -lgmp
+	nvcc $(INC) $(LIB) -I../../include -I/usr/local/cuda-12.6/include -ccbin g++ -std=c++11 -arch=sm_80 modinv_odd_faster.cu -o mo_faster -lgmp
 

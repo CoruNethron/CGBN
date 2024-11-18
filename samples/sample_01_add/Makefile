@@ -37,5 +37,5 @@ turing:
 	nvcc $(INC) $(LIB) -I../../include -arch=sm_75 add.cu -o add -lgmp
 
 ampere: 
-	nvcc $(INC) $(LIB) -I../../include -arch=sm_80 add.cu -o add -lgmp
+	nvcc $(INC) $(LIB) -I../../include -I/usr/local/cuda-12.6/include -ccbin g++ -std=c++11 -arch=sm_80 add.cu -o add -lgmp
 
