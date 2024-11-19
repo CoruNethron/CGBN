@@ -1,10 +1,42 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <stdlib.h>
+#include <map>
 #include <cuda.h>
 #include <gmp.h>
 #include "cgbn/cgbn.h"
 #include "../utility/support.h"
+
+#define xmpz(v, t, n)                       \
+  mpz_t v;                                  \
+  set_words(t._limbs, n, params::BITS/32);  \
+  mpz_init(v); /* requires mpz_clear(v) */  \
+  to_mpz(v, t._limbs, params::BITS/32);
+
+/*struct cgbnLessThan {
+    bool operator()(const cgbn_mem_t<params::BITS>& a, const cgbn_mem_t<params::BITS>& b) const {
+        return compare_words(a._limbs, b._limbs, params::BITS/32) == -1;
+    }
+};*/
+
+class mpz_point {
+  public:
+    mpz_t x;
+    mpz_t y;
+
+    mpz_point(const mpz_t xSrc, const mpz_t ySrc){
+        mpz_init(x);
+        mpz_init(y);
+
+        mpz_set(x, xSrc);
+        mpz_set(y, ySrc);
+    }
+
+    ~mpz_point(){
+        mpz_clear(x);
+        mpz_clear(y);
+    }
+};
 
 template<uint32_t tpi, uint32_t bits, uint32_t window_bits>
 class powm_params_t {
@@ -154,19 +186,25 @@ class powm_odd_t {
     }
     else cgbn_set_ui32(_env, result, 1); // p=0, thus x^p mod modulus=1
   }
-  
-  __host__ static instance_t *generate_instances(uint32_t count) {
+
+  __host__ static instance_t *generate_instances(uint32_t gen_elements, uint32_t gen_fib) {
       static cgbn_mem_t<params::BITS> tmp;
 
-      mpz_t p, gx, gy;
+      xmpz( p,        tmp, "fffffffffffffffffffffffffffffffffffffffffffffffffffffffefffffc2f" );
+      xmpz( gx,       tmp, "79be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798" );
+      xmpz( gy,       tmp, "483ada7726a3c4655da4fbfc0e1108a8fd17b448a68554199c47d08ffb10d4b8" );
+      xmpz( nmax,     tmp, "fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364141" );
+      xmpz( BORDER_P, tmp, "0000010000000000000000000000000000000000000000000000000000000000" );
+      xmpz( LIMIT,    tmp, "3fffffffffffffffffffffffffffffffaeabb739abd2280eeff497a3340d9050" );
 
-      set_words(tmp._limbs, "fffffffffffffffffffffffffffffffffffffffffffffffffffffffefffffc2f", params::BITS/32);
+      mpz_point pg(gx, gy);
 
-      mpz_init(p);
-      mpz_init(gx);
-      mpz_init(gy);
+      std::map<uint32_t, mpz_point> fibMap = {};
 
-      to_mpz(p, tmp._limbs, params::BITS/32);
+      for(int uint32_t=1; i<100; i++){
+          uint32_t a = 1, b = i;
+
+      }
 
     instance_t *instances=(instance_t *)malloc(sizeof(instance_t)*count);
     int         index;
@@ -253,7 +291,7 @@ void run_test(uint32_t nelts, uint32_t addElms) {
   int32_t              TPI=params::TPI, IPB=TPB/TPI;                // IPB is instances per block
 
   printf("Genereating instances ...\n");
-  instances=powm_odd_t<params>::generate_instances(instance_count);
+  instances=powm_odd_t<params>::generate_instances(nelts, addElms);
 
   printf("Copying instances to the GPU ...\n");
   CUDA_CHECK(cudaSetDevice(0));
