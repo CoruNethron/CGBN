@@ -201,7 +201,7 @@ class powm_odd_t {
 
       std::map<uint32_t, mpz_point> fibMap = {};
 
-      for(int uint32_t=1; i<100; i++){
+      for(uint32_t i=1; i<100; i++){
           uint32_t a = 1, b = i;
 
       }
